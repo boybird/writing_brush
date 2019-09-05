@@ -16,4 +16,3 @@ pub mod models;
 pub mod requests;
 pub mod schema;
 pub mod web;
-const JSON_CONTENT_TYPE: &'static str = "application/json";

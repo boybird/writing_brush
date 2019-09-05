@@ -17,9 +17,9 @@ content-type: application/json
 ### login
 
 POST http://localhost:8080/login
-Content-Length: application/json
+content-type: application/json
 
 {
-    "name":"zxk7516",
+    "name":"zxk7517",
     "password": "111111"
 }
