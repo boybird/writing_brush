@@ -1,0 +1,15 @@
+### get user with id of 1
+get http://localhost:8080/info/1
+
+### get user with id of 77293 which doesn't exist
+get http://localhost:8080/info/77293
+
+### register
+POST http://localhost:8080/register
+content-type: application/json
+
+{
+    "name":"zxk7516",
+    "email":"zxk7516@foxmail.com",
+    "password":"111111"
+}
