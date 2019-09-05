@@ -13,7 +13,11 @@ pub fn register(db: web::Data<PgPool>, form: web::Json<RegisterForm>) -> impl Re
     // form.into_inner()
     let mut form = form.into_inner();
     match form.validate() {
-        Err(e) => return HttpResponse::BadRequest().content_type("aplication/json").body(serde_json::to_string(&e).unwrap()),
+        Err(e) => {
+            return HttpResponse::BadRequest()
+                .content_type("aplication/json")
+                .body(serde_json::to_string(&e).unwrap())
+        }
         Ok(_) => {
             form.password = "".to_string();
             let r = diesel::insert_into(users::table)

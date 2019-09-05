@@ -1,6 +1,5 @@
 use serde::Serialize;
 
-
 #[derive(Queryable, Debug, Serialize)]
 pub struct User {
     pub id: i32,
