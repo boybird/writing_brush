@@ -28,7 +28,8 @@ pub fn register(db: web::Data<PgPool>, form: web::Json<RegisterForm>) -> impl Re
     let mut form = form.into_inner();
     let _ = form.validate()?;
 
-    form.password = bcrypt::hash(form.password, 4)?;
+    form.password =
+        bcrypt::hash(form.password, 4).map_err(|_| WebError::InternalServerError)?;
     let r = diesel::insert_into(users::table)
         .values(&form)
         .get_result::<crate::models::user::User>(&*db.get().unwrap())?;
