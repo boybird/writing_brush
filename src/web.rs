@@ -1,9 +1,5 @@
 use crate::controllers;
-use actix_http::{
-    body::Body,
-    http::{header, StatusCode},
-    Response,
-};
+use actix_http::{http::StatusCode, Response};
 use actix_web::{middleware, web, App, HttpServer, Responder, ResponseError};
 use std::convert::From;
 use std::io;
@@ -70,12 +66,6 @@ impl From<serde_json::Error> for WebError {
     }
 }
 
-// impl From<WebError> for actix_web::error::Error {
-//     fn from(err: WebError) -> actix_web::error::Error {
-//         unimplemented!()
-//     }
-// }
-
 pub fn run() -> io::Result<()> {
     let db_pool = crate::db::create_connection_pool();
     HttpServer::new(move || {
@@ -83,7 +73,7 @@ pub fn run() -> io::Result<()> {
             .data(db_pool.clone())
             .wrap(middleware::Logger::default())
             // .route("/info/{name}", web::get().to_async(info))
-            .route("/info/{name}", web::get().to(info2))
+            .route("/info/{id}", web::get().to(info2))
             .route("/register", web::post().to(controllers::user::register))
             .route("/login", web::post().to(controllers::user::login))
     })
@@ -95,16 +85,14 @@ fn _print_type_of<T>(_: &T) {
     println!("{}", std::intrinsics::type_name::<T>());
 }
 pub fn info2(path: web::Path<i32>, db: web::Data<crate::db::PgPool>) -> impl Responder {
-    let pool = db.get()?;
+    let pool = db.get().unwrap();
 
     use crate::models::user::User;
     use crate::schema::users::dsl::*;
     use diesel::prelude::*;
     let results = users
-        // .filter(email.eq("zxk7516@foxmail.com".to_string()))
         .filter(id.eq(path.into_inner()))
         .limit(1)
         .load::<User>(&*pool)?;
     WebResult::Ok(web::Json(results))
-    // web::Json(results)
 }

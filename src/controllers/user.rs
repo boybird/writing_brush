@@ -10,14 +10,12 @@ use validator::Validate;
 pub fn login(db: web::Data<PgPool>, form: web::Json<LoginForm>) -> impl Responder {
     let form = form.into_inner();
     let _ = form.validate()?;
-
     let login = users
         .filter(name.eq(form.name))
         .limit(1)
-        .load::<User>(&*db.get().map_err(|_| WebError::DbError)?)?;
+        .load::<User>(&*db.get().unwrap())?;
     let login = login.first().ok_or(WebError::NotFound)?;
-    let bc_password = bcrypt::hash(form.password, bcrypt::DEFAULT_COST)?;
-    if bc_password == login.password {
+    if bcrypt::verify(form.password, &login.password)? {
         WebResult::Ok(serde_json::to_string(login)?)
     } else {
         WebResult::Err(WebError::AuthFailed)
@@ -27,7 +25,8 @@ pub fn login(db: web::Data<PgPool>, form: web::Json<LoginForm>) -> impl Responde
 pub fn register(db: web::Data<PgPool>, form: web::Json<RegisterForm>) -> impl Responder {
     let mut form = form.into_inner();
     let _ = form.validate()?;
-    form.password = bcrypt::hash(form.password, bcrypt::DEFAULT_COST)?;
+
+    form.password = bcrypt::hash(form.password, 4)?;
     let r = diesel::insert_into(users::table)
         .values(&form)
         .get_result::<crate::models::user::User>(&*db.get().unwrap())?;
