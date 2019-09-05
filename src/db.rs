@@ -32,11 +32,11 @@ mod tests {
     fn test_pg_connection() {}
 
     #[test]
-    fn test_pg_connection_pool() {
+    fn test_pg_connection_pool() -> Result<(), &'static str> {
         use crate::models::user::User;
         use crate::schema::users::dsl::*;
         let pool = create_connection_pool();
-        let conn = &*pool.get().unwrap();
+        let conn = &*pool.get().map_err(|_| "err")?;
         let results = users
             // .filter(email.eq("zxk7516@foxmail.com".to_string()))
             .filter(id.eq(1))
@@ -46,5 +46,6 @@ mod tests {
         for user in results {
             println!("{:?}", user);
         }
+        Ok(())
     }
 }
