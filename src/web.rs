@@ -11,6 +11,7 @@ pub fn run() -> io::Result<()> {
             // .route("/info/{name}", web::get().to_async(info))
             .route("/info/{name}", web::get().to(info2))
             .route("/register", web::post().to(controllers::user::register))
+            .route("/login", web::post().to(controllers::user::login))
     })
     .bind("127.0.0.1:8080")?
     .run()

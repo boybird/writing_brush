@@ -9,7 +9,17 @@ POST http://localhost:8080/register
 content-type: application/json
 
 {
-    "name":"zxk7516",
-    "email":"zxk7516@foxmail.com",
+    "name":"zxk7517",
+    "email":"zxk7517@foxmail.com",
     "password":"111111"
+}
+
+### login
+
+POST http://localhost:8080/login
+Content-Length: application/json
+
+{
+    "name":"zxk7516",
+    "password": "111111"
 }
