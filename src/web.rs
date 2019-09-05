@@ -81,9 +81,6 @@ pub fn run() -> io::Result<()> {
     .run()
 }
 
-fn _print_type_of<T>(_: &T) {
-    println!("{}", std::intrinsics::type_name::<T>());
-}
 pub fn info2(path: web::Path<i32>, db: web::Data<crate::db::PgPool>) -> impl Responder {
     let pool = db.get().unwrap();
 
