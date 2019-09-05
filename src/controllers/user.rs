@@ -15,7 +15,9 @@ pub fn login(db: web::Data<PgPool>, form: web::Json<LoginForm>) -> impl Responde
         .limit(1)
         .load::<User>(&*db.get().unwrap())?;
     let login = login.first().ok_or(WebError::NotFound)?;
-    if bcrypt::verify(form.password, &login.password)? {
+    if bcrypt::verify(form.password, &login.password)
+        .map_err(|_| WebError::InternalServerError)?
+    {
         WebResult::Ok(serde_json::to_string(login)?)
     } else {
         WebResult::Err(WebError::AuthFailed)
@@ -31,4 +33,12 @@ pub fn register(db: web::Data<PgPool>, form: web::Json<RegisterForm>) -> impl Re
         .values(&form)
         .get_result::<crate::models::user::User>(&*db.get().unwrap())?;
     crate::web::WebResult::Ok(serde_json::to_string(&r)?)
+}
+
+pub fn info2(path: web::Path<i32>, db: web::Data<crate::db::PgPool>) -> impl Responder {
+    let login = users
+        .filter(id.eq(path.into_inner()))
+        .limit(1)
+        .load::<User>(&*db.get().unwrap())?;
+    WebResult::Ok(serde_json::to_string(&login))
 }

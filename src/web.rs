@@ -1,6 +1,6 @@
 use crate::controllers;
 use actix_http::{http::StatusCode, Response};
-use actix_web::{middleware, web, App, HttpServer, Responder, ResponseError};
+use actix_web::{middleware, web, App, HttpServer, ResponseError};
 use std::convert::From;
 use std::io;
 
@@ -22,8 +22,8 @@ pub enum WebError {
     Hash,
     #[fail(display = "json format error")]
     JsonFormatError,
-    #[fail(display = "json format error")]
-    BcryptError,
+    #[fail(display = "Interneal server error")]
+    InternalServerError,
 }
 
 impl ResponseError for WebError {
@@ -41,11 +41,6 @@ pub type WebResult<T> = actix_http::error::Result<T, WebError>;
 impl From<validator::ValidationErrors> for WebError {
     fn from(_err: validator::ValidationErrors) -> WebError {
         WebError::BadRequest(serde_json::to_string(&_err).unwrap())
-    }
-}
-impl From<bcrypt::BcryptError> for WebError {
-    fn from(_err: bcrypt::BcryptError) -> WebError {
-        WebError::BcryptError
     }
 }
 
@@ -72,24 +67,10 @@ pub fn run() -> io::Result<()> {
         App::new()
             .data(db_pool.clone())
             .wrap(middleware::Logger::default())
-            // .route("/info/{name}", web::get().to_async(info))
-            .route("/info/{id}", web::get().to(info2))
+            .route("/info/{id}", web::get().to(controllers::user::info2))
             .route("/register", web::post().to(controllers::user::register))
             .route("/login", web::post().to(controllers::user::login))
     })
     .bind("127.0.0.1:8080")?
     .run()
-}
-
-pub fn info2(path: web::Path<i32>, db: web::Data<crate::db::PgPool>) -> impl Responder {
-    let pool = db.get().unwrap();
-
-    use crate::models::user::User;
-    use crate::schema::users::dsl::*;
-    use diesel::prelude::*;
-    let results = users
-        .filter(id.eq(path.into_inner()))
-        .limit(1)
-        .load::<User>(&*pool)?;
-    WebResult::Ok(web::Json(results))
 }
