@@ -1,7 +1,6 @@
 use crate::controllers;
 use actix_http::{http::StatusCode, Response};
 use actix_web::{middleware, web, App, HttpServer, ResponseError};
-use std::convert::From;
 use std::io;
 
 use failure::Fail;
